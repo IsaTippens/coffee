@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
+import 'package:coffee/Storage/coffee_boxes.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({Key? key}) : super(key: key);
@@ -8,35 +9,29 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  _HomePageState() {
-    if (box.isEmpty) {
-      box.put("today", 0);
-    }
-  }
-  final box = Hive.box("coffee");
-
-  int getToday() {
-    int? today = box.get("today");
-    if (today == null) {
-      return 0;
-    }
-    return today;
-  }
+  _HomePageState();
+  final box = CoffeeBox();
 
   void decrement() {
     setState(() {
-      int num = box.get("today");
+      int num = box.getToday();
       if (num > 0) {
-        box.put("today", num - 1);
+        box.setToday(num - 1);
       }
     });
   }
 
   void increment() {
     setState(() {
-      int num = box.get("today");
-      box.put("today", num + 1);
+      int num = box.getToday();
+      box.setToday(num + 1);
     });
+  }
+
+  int getYesterday() {
+    DateTime d = DateTime.now();
+    d = DateUtils.addDaysToDate(d, -1);
+    return box.getCoffeeFromDate(d);
   }
 
   @override
@@ -49,8 +44,15 @@ class _HomePageState extends State<HomePage> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const Text("Coffees today: ", style: TextStyle(fontSize: 18.0)),
-            Text("${getToday()} cups", style: TextStyle(fontSize: 36.0)),
+            Column(children: [
+              const Text("Coffees today: ", style: TextStyle(fontSize: 18.0)),
+              Text("${box.getToday()} cups", style: TextStyle(fontSize: 36.0)),
+            ]),
+            Column(children: [
+              const Text("Coffees yesterday: ",
+                  style: TextStyle(fontSize: 12.0)),
+              Text("${getYesterday()} cups", style: TextStyle(fontSize: 12.0)),
+            ]),
           ],
         ),
       ),
